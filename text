@@ -1,0 +1,1 @@
+This is project build number of time run on sonarqube but not fail using -Dsonar.projectVersion=${BUILD_NUMBER} 
