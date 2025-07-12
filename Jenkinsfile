@@ -14,7 +14,7 @@ pipeline {
 
         stage('Git Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/satishchippa-bob/FullStack-Blogging-App.git'
+                git branch: 'main', url: 'https://github.com/snehalatabarenkal/FullStack-Blogging-App.git'
             }
         }
 
@@ -58,8 +58,8 @@ pipeline {
                     def tag = "${env.BUILD_NUMBER}"
                     withDockerRegistry(credentialsId: 'dockerhub', toolName: 'docker') {
                         sh """
-                            docker build -t satishchippabob/blogging-apps:${tag} .
-                            docker tag satishchippabob/blogging-apps:${tag} satishchippabob/blogging-apps:latest
+                            docker build -t snehalatabarenkal/blogging-apps:${tag} .
+                            docker tag snehalatabarenkal/blogging-apps:${tag} snehalatabarenkal/blogging-apps:latest
                         """
                     }
                 }
@@ -68,7 +68,7 @@ pipeline {
 
         stage('Scan Docker Image by Trivy') {
             steps {
-                sh 'trivy image --format table -o image-report.html satishchippabob/blogging-apps:latest'
+                sh 'trivy image --format table -o image-report.html snehalatabarenkal/blogging-apps:latest'
             }
         }
 
@@ -78,8 +78,8 @@ pipeline {
                     def tag = "${env.BUILD_NUMBER}"
                     withDockerRegistry(credentialsId: 'dockerhub', toolName: 'docker') {
                         sh """
-                            docker push satishchippabob/blogging-apps:${tag}
-                            docker push satishchippabob/blogging-apps:latest
+                            docker push snehalatabarenkal/blogging-apps:${tag}
+                            docker push snehalatabarenkal/blogging-apps:latest
                         """
                     }
                 }
