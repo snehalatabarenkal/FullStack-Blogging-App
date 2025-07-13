@@ -94,7 +94,7 @@ pipeline {
                     contextName: '', 
                     credentialsId: 'k8_cred', 
                     namespace: 'webapps', 
-                    serverUrl: 'https://1A1C8869B30A00DF61E41E6EBD23FEF7.gr7.us-west-2.eks.amazonaws.com'
+                    serverUrl: 'https://D36CD53F592EAF67D8C3F2552340B3E6.sk1.ap-northeast-3.eks.amazonaws.com'
                 ]]) {
                     sh 'kubectl apply -f deployment-service.yml'
                 }
@@ -109,7 +109,7 @@ pipeline {
                     contextName: '', 
                     credentialsId: 'k8_cred', 
                     namespace: 'webapps', 
-                    serverUrl: 'https://1A1C8869B30A00DF61E41E6EBD23FEF7.gr7.us-west-2.eks.amazonaws.com'
+                    serverUrl: 'https://D36CD53F592EAF67D8C3F2552340B3E6.sk1.ap-northeast-3.eks.amazonaws.com'
                 ]]) {
                     sh 'kubectl get pods'
                     sh 'kubectl get svc'
