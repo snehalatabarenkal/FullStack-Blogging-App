@@ -96,7 +96,8 @@ pipeline {
                     namespace: 'webapps', 
                     serverUrl: 'https://D36CD53F592EAF67D8C3F2552340B3E6.sk1.ap-northeast-3.eks.amazonaws.com'
                 ]]) {
-                    sh 'kubectl apply -f deployment-service.yml'
+                    sh 'kubectl apply --validate=false -f deployment-service.yml'
+
                 }
             }
         }
