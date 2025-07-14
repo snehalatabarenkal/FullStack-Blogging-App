@@ -88,7 +88,7 @@ pipeline {
 
         stage('K8s Deployment') {
             steps {
-                withKubeCredentials(kubectlCredentials: [[
+                withKubeConfig([credentialsId: 'k8_cred']) { [[
                     caCertificate: '', 
                     clusterName: 'devopsshack-cluster', 
                     contextName: '', 
@@ -104,7 +104,7 @@ pipeline {
 
         stage('Verify Deployment') {
             steps {
-                withKubeCredentials(kubectlCredentials: [[
+                withKubeConfig([credentialsId: 'k8_cred']) { [[
                     caCertificate: '', 
                     clusterName: 'devopsshack-cluster', 
                     contextName: '', 
