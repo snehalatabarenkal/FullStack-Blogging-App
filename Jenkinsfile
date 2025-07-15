@@ -55,12 +55,8 @@ pipeline {
         stage('Build & Tag Docker Image') {
             steps {
                 script {
-                    def tag = "${env.BUILD_NUMBER}"
                     withDockerRegistry(credentialsId: 'dockerhub', toolName: 'docker') {
-                        sh """
-                            docker build -t snehalatabarenkal/blogging-apps:${tag} .
-                            docker tag snehalatabarenkal/blogging-apps:${tag} snehalatabarenkal/blogging-apps:latest
-                        """
+                        sh "docker build -t snehalatabarenkal/blogging-apps:latest ."
                     }
                 }
             }
@@ -75,12 +71,8 @@ pipeline {
         stage('Push Docker Image') {
             steps {
                 script {
-                    def tag = "${env.BUILD_NUMBER}"
                     withDockerRegistry(credentialsId: 'dockerhub', toolName: 'docker') {
-                        sh """
-                            docker push snehalatabarenkal/blogging-apps:${tag}
-                            docker push snehalatabarenkal/blogging-apps:latest
-                        """
+                        sh 'docker push snehalatabarenkal/blogging-apps:latest'
                     }
                 }
             }
@@ -88,32 +80,29 @@ pipeline {
 
         stage('K8s Deployment') {
             steps {
-                withKubeConfig([credentialsId: 'k8_cred']) { [[
-                    caCertificate: '', 
-                    clusterName: 'devopsshack-cluster', 
-                    contextName: '', 
-                    credentialsId: 'k8_cred', 
-                    namespace: 'webapps', 
-                    serverUrl: 'https://D36CD53F592EAF67D8C3F2552340B3E6.sk1.ap-northeast-3.eks.amazonaws.com'
-                ]]) {
-                    sh 'kubectl apply --validate=false -f deployment-service.yml'
-
+                withKubeConfig(
+                    credentialsId: 'k8_cred',
+                    clusterName: 'devopsshack-cluster',
+                    serverUrl: 'https://6E12EBD36A3C4B7290F1381580DC002B.gr7.ap-northeast-3.eks.amazonaws.com',
+                    namespace: 'webapps',
+                    restrictKubeConfigAccess: false
+                ) {
+                    sh 'kubectl apply -f deployment-service.yml -n webapps'
                 }
             }
         }
 
         stage('Verify Deployment') {
             steps {
-                withKubeConfig([credentialsId: 'k8_cred']) { [[
-                    caCertificate: '', 
-                    clusterName: 'devopsshack-cluster', 
-                    contextName: '', 
-                    credentialsId: 'k8_cred', 
-                    namespace: 'webapps', 
-                    serverUrl: 'https://D36CD53F592EAF67D8C3F2552340B3E6.sk1.ap-northeast-3.eks.amazonaws.com'
-                ]]) {
-                    sh 'kubectl get pods'
-                    sh 'kubectl get svc'
+                withKubeConfig(
+                    credentialsId: 'k8_cred',
+                    clusterName: 'devopsshack-cluster',
+                    serverUrl: 'https://6E12EBD36A3C4B7290F1381580DC002B.gr7.ap-northeast-3.eks.amazonaws.com',
+                    namespace: 'webapps',
+                    restrictKubeConfigAccess: false
+                ) {
+                    sh 'kubectl get pods -n webapps'
+                    sh 'kubectl get svc -n webapps'
                 }
             }
         }
@@ -142,7 +131,7 @@ pipeline {
                 emailext(
                     subject: "Jenkins Job: ${env.JOB_NAME} #${env.BUILD_NUMBER} - ${pipelineStatus}",
                     body: body,
-                    to: 'amrutaadma20@gmail.com ',
+                    to: 'laddubarenkal@gmail.com',
                     from: 'snehalatabarenkal2004@gmail.com',
                     replyTo: 'snehalatabarenkal2004@gmail.com',
                     mimeType: 'text/html'
