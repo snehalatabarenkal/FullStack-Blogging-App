@@ -83,7 +83,7 @@ pipeline {
                 withKubeConfig(
                     credentialsId: 'k8_cred',
                     clusterName: 'devopsshack-cluster',
-                    serverUrl: 'https://0330B2F6E0023583E59F0B18AA0D6490.sk1.ap-northeast-3.eks.amazonaws.com',
+                    serverUrl: 'https://C258CB2428552A92586882AB2A2D73D7.yl4.ap-northeast-3.eks.amazonaws.com',
                     namespace: 'webapps',
                     restrictKubeConfigAccess: false
                 ) {
@@ -97,7 +97,7 @@ pipeline {
                 withKubeConfig(
                     credentialsId: 'k8_cred',
                     clusterName: 'devopsshack-cluster',
-                    serverUrl: 'https://0330B2F6E0023583E59F0B18AA0D6490.sk1.ap-northeast-3.eks.amazonaws.com',
+                    serverUrl: 'https://C258CB2428552A92586882AB2A2D73D7.yl4.ap-northeast-3.eks.amazonaws.com',
                     namespace: 'webapps',
                     restrictKubeConfigAccess: false
                 ) {
