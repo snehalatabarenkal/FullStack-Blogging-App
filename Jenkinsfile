@@ -11,64 +11,74 @@ pipeline {
     }
 
     stages {
-
         stage('Git Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/snehalatabarenkal/FullStack-Blogging-App.git'
+                git branch: 'main', credentialsId: 'github', url: 'https://github.com/snehalatabarenkal/FullStack-Blogging-App.git'
             }
         }
 
-        stage('Build & Test') {
+        stage('Compile') {
             steps {
-                sh 'mvn clean install'
+                sh 'mvn compile'
+            }
+        }
+
+        stage('Test') {
+            steps {
+                sh 'mvn test'
             }
         }
 
         stage('Trivy FS Scan') {
             steps {
-                sh 'trivy fs --format table -o fs-report.html .'
+                sh 'trivy fs --format table -o fs.html .'
             }
         }
 
         stage('SonarQube Analysis') {
             steps {
-                sh 'rm -rf .scannerwork'
                 withSonarQubeEnv('SonarQube') {
-                    sh '''${SCANNER_HOME}/bin/sonar-scanner \
-                        -Dsonar.projectKey=blogging1 \
-                        -Dsonar.projectName=blogging1 \
-                        -Dsonar.projectVersion=${BUILD_NUMBER} \
-                        -Dsonar.sources=src/main/java \
-                        -Dsonar.java.binaries=target'''
+                    sh '''
+                        ${SCANNER_HOME}/bin/sonar-scanner \
+                        -Dsonar.projectName=blogging-app \
+                        -Dsonar.projectKey=blogging-app \
+                        -Dsonar.java.binaries=target
+                    '''
                 }
             }
         }
 
-        stage('Artifact Publish') {
+        stage('Build') {
             steps {
-                withMaven(globalMavenSettingsConfig: 'maven-settings', jdk: 'jdk17', maven: 'maven3', traceability: true) {
+                sh 'mvn package'
+            }
+        }
+
+        stage('Publish Artifacts') {
+            steps {
+                withMaven(globalMavenSettingsConfig: 'maven-settings', jdk: 'jdk17', maven: 'maven3') {
                     sh 'mvn deploy'
                 }
             }
         }
 
-        stage('Build & Tag Docker Image') {
+        stage('Docker Build & Tag') {
             steps {
                 script {
                     withDockerRegistry(credentialsId: 'dockerhub', toolName: 'docker') {
-                        sh "docker build -t snehalatabarenkal/blogging-apps:latest ."
+                        sh 'docker build -t snehalatabarenkal/blogging-apps:latest .'
                     }
                 }
             }
         }
 
-        stage('Scan Docker Image by Trivy') {
+        stage('Trivy Image Scan') {
             steps {
-                sh 'trivy image --format table -o image-report.html snehalatabarenkal/blogging-apps:latest'
+                sh 'trivy image --format table -o image.html snehalatabarenkal/blogging-apps:latest'
             }
         }
 
-        stage('Push Docker Image') {
+        stage('Docker Push') {
             steps {
                 script {
                     withDockerRegistry(credentialsId: 'dockerhub', toolName: 'docker') {
@@ -78,28 +88,32 @@ pipeline {
             }
         }
 
-        stage('K8s Deployment') {
+        stage('K8s Deploy App') {
             steps {
                 withKubeConfig(
-                    credentialsId: 'k8_cred',
+                    caCertificate: '',
                     clusterName: 'devopsshack-cluster',
-                    serverUrl: 'https://C258CB2428552A92586882AB2A2D73D7.yl4.ap-northeast-3.eks.amazonaws.com',
+                    contextName: '',
+                    credentialsId: 'k8_cred',
                     namespace: 'webapps',
-                    restrictKubeConfigAccess: false
+                    restrictKubeConfigAccess: false,
+                    serverUrl: 'https://4F4FAFBBDEE98E54783E6B4734B4F404.yl4.ap-northeast-3.eks.amazonaws.com'
                 ) {
-                    sh 'kubectl apply -f deployment-service.yml -n webapps'
+                    sh "kubectl apply -f deployment-service.yml -n webapps"
                 }
             }
         }
 
-        stage('Verify Deployment') {
+        stage('K8s Status Check') {
             steps {
                 withKubeConfig(
-                    credentialsId: 'k8_cred',
+                    caCertificate: '',
                     clusterName: 'devopsshack-cluster',
-                    serverUrl: 'https://C258CB2428552A92586882AB2A2D73D7.yl4.ap-northeast-3.eks.amazonaws.com',
+                    contextName: '',
+                    credentialsId: 'k8_cred',
                     namespace: 'webapps',
-                    restrictKubeConfigAccess: false
+                    restrictKubeConfigAccess: false,
+                    serverUrl: 'https://4F4FAFBBDEE98E54783E6B4734B4F404.yl4.ap-northeast-3.eks.amazonaws.com'
                 ) {
                     sh 'kubectl get pods -n webapps'
                     sh 'kubectl get svc -n webapps'
